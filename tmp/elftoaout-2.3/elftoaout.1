@@ -1,0 +1,77 @@
+.\" -*- nroff -*-
+.\" Copyright 2000 by Jakub Jelinek.  All Rights Reserved.
+.\" This file may be copied under the terms of the GNU Public License.
+.\" 
+.TH ELFTOAOUT 1 "June 2000" "Elftoaout version 2.3"
+.SH NAME
+elftoaout \- ELF to a.out convertor
+.SH SYNOPSIS
+.B elftoaout
+[
+.B -b
+]
+[
+.B -o
+.I outfile
+]
+[
+.B -V
+]
+.I infile
+.SH DESCRIPTION
+.BI elftoaout
+converts a 32bit or 64bit SPARC ELF image to a.out format.
+This is needed for SPARC bootstraps, as Sun PROM expects a.out image when
+booting via net or tape or from the disk. On the disk, most of the people
+use 
+.B SILO, 
+which uses
+.I elftoaout
+to create first stage loader, but understands ELF format, so you don't need
+to convert a kernel if you will boot it with 
+.B SILO.
+.PP
+.SH OPTIONS
+.TP
+.I -b
+.B sun4
+format. Unlike other PROMs (
+.B sun4[cdemu]
+), sun4 PROM does not understand the 32bit 
+.B a.out
+header and thus this option strips the header from the image. Other PROMs
+need such a header, so use this only if you are building an image for
+.B sun4
+or other architectures that explicitly reqire a headerless image.
+.TP
+.I -V
+Print
+.B elftoaout
+version and exit.
+.TP
+.I -o outfile
+Specify output file name, instead of the default
+.B a.out
+.TP
+.I -c
+Compute an image checksum and store it in a.out header.
+.TP
+.I infile
+Required parameter which specifies the ELF image to be converted.
+.SH BUGS
+This utility can handle just a couple of specific cases needed for kernel
+and SILO conversions, but is not able to to convert all 
+.B ELF 
+binaries to
+.B a.out.
+It can only convert static binaries and has a couple of other limitations.
+.SH AUTHOR
+.B elftoaout
+has been written by Pete A. Zaitcev <zaitcev@vger.rutgers.edu>, support for
+64bit ELF has been added by Jakub Jelinek <jj@ultra.linux.cz>.
+.SH AVAILABILITY
+.B elftoaout
+is available for anonymous ftp from sunsite.mff.cuni.cz in
+/OS/Linux/Sparc/local/elftoaout/.
+.SH SEE ALSO
+.BR silo (8)

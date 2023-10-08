@@ -13,6 +13,9 @@ gcc -c  src/io.c -m32 -nostdinc -fno-builtin -fno-stack-protector -nostartfiles 
 
 ld -T link.ld -melf_i386 out/boot.o out/fs.o out/main.o out/vga.o out/cd.o out/io.o -o iso/boot/kernel
 
+echo Comp Programs
+#gcc programs/init.c -o iso/bin/elf/init
+
 mkisofs -R                              \
                 -b  boot/grub/stage2_eltorito    \
                 -no-emul-boot                   \

@@ -14,7 +14,7 @@ typedef struct {
 
 
 typedef struct {
-    char fileID[256];
+    char* fileID;
     uint32_t locOfExtent;
     uint32_t sizeOfExtent;
 
@@ -25,8 +25,8 @@ typedef struct {
 // FS's
 CD_FS rootMedia;
 
-CD_DirectoryEntry d_entries[256];
-int cDirE; // current index of directory index being loaded
+static CD_DirectoryEntry d_entries[256];
+static int cDirE = 0; // current index of directory index being loaded
 
 void initFS();
 

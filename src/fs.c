@@ -107,9 +107,14 @@ void initCDFS(){
     }*/
     
     kprintf("================================");
-
-    kprintf("[KFS] Root Media label:");
-    kprintf(rootMedia.CD_volID);
+    
+  // 7
+    kprintf(d_entries[cDirE].fileID);
+    /*uint8_t t_lba = d_entries[7].locOfExtent;
+    uint8_t t_size = d_entries[7].sizeOfExtent;
+    uint8_t t_data[t_size];
+    read_cdrom(0x1F0, 0, t_lba, 1, &data);
+    kprintf((char*)t_data);*/
     return;
 }
 
@@ -121,10 +126,13 @@ void readDirectoryEntry(){
 void readDirectory(uint8_t* data, char* dirs){
   int currentpos = 000;
   for(int i = 0; i < 256; i++){
-    
+    int flags = data[currentpos + 25];
     int idSize = data[currentpos + 32];
     char Tid[256];
-    for(int i = 0; i < idSize; i++){
+    for(int i = 0; i < idSize && data[i + currentpos + 33] != ';'; i++){
+        if((flags >> 1) & 1 == 1 || data[i + currentpos + 34] == ';'){
+          if(data[i + currentpos + 33] == '.') break;
+        }
         Tid[i] = data[i + currentpos + 33];
     }
     // Retrieve data
@@ -137,19 +145,21 @@ void readDirectory(uint8_t* data, char* dirs){
         dTmp[i - (currentpos + 10)] = data[i];
     }
     uint32_t size = little_endian_to_uint32(dTmp);
-    CD_DirectoryEntry d = {Tid, lba, size, 0};
-    cDirE++;
-    d_entries[cDirE] = d;
+    
     char fullPath[1024] = {0};
     if(idSize > 1){
       strcat(fullPath, dirs);
       strcat(fullPath, Tid);
-      strcat(fullPath, "/");
+      if((flags >> 1) & 1 == 1)
+        strcat(fullPath, "/");
       kprintf(fullPath);
+      CD_DirectoryEntry d = {fullPath, lba, size, 0};
+      cDirE++;
+      d_entries[cDirE] = d;
     }
     
     // Check if its a sub-directory
-    int flags = data[currentpos + 25];
+    
     if((flags >> 1) & 1 == 1 && idSize > 1){
       uint8_t m_data[2048];
       read_cdrom(0x1F0, 0, lba, 1, &m_data);

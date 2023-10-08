@@ -1,0 +1,7 @@
+run = "sh compile.sh"
+
+[nix]
+channel = "stable-22_11"
+
+[deployment]
+run = ["sh", "-c", "sh compile.sh"]

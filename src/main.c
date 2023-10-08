@@ -6,7 +6,7 @@
 int kmain(){
     // Init display
     initTerminal();
-    kprintf("T54 Display Initilized");
+    kprintf("[Kernel] T54 Display Initilized");
     // Init fs
     initFS();
     kprintf("[Kernel] Launching /bin/init");

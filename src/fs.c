@@ -109,7 +109,7 @@ void initCDFS(){
     kprintf("================================");
     
   // 7
-    char* fileName = "/BOOT/GRUB/MENU.LST";
+    char* fileName = "/README.TXT";
     uint32_t t_size = getFile(fileName)->sizeOfExtent;
     uint8_t t_data[t_size];
     if(readFile(fileName, &t_data) != -1)
@@ -147,7 +147,7 @@ void readDirectory(uint8_t* data, char* dirs){
     }
     uint32_t size = little_endian_to_uint32(dTmp);
     
-    char fullPath[1024] = {0};
+    char fullPath[1024] = {0, 0, 0, 0, 0, 0};
     if(idSize > 1){
       strcat(fullPath, dirs);
       strcat(fullPath, Tid);

@@ -67,33 +67,63 @@ void initCDFS(){
         tmp[i - (rootOffset + 2)] = pvd[i];
     }
     uint32_t r_extentLBA = little_endian_to_uint32(tmp);
-    for(int i = rootOffset + 10; i < rootOffset + 16; i++){
+    for(int i = rootOffset + 10; i < rootOffset + 14; i++){
         tmp[i - (rootOffset + 10)] = pvd[i];
     }
     uint32_t r_extentSize = little_endian_to_uint32(tmp);
 
+    int idSize = pvd[rootOffset + 32];
+  
     char id[256];
-    for(int i = rootOffset + 33; pvd[i] != ';' && i < 256 && pvd[i] != 0; i++){
+    for(int i = rootOffset + 33; i < idSize; i++){
         id[i - (rootOffset + 33)] = pvd[i];
     }
 
     CD_DirectoryEntry root = {id, r_extentLBA, r_extentSize, 0};
     d_entries[cDirE] = root;
-    
 
-    /*uint8_t tmp[4];
-    for(int i = pathOffset; i < pathOffset + 3; i++){
-        tmp[i - pathOffset] = pvd[i];
+    uint8_t data[2048];
+    read_cdrom(0x1F0, 0, r_extentLBA, 1, &data);
+
+    kprintf("================================");
+    kprintf("[KFS] Directory listing for '/':");
+    // Print out directories/files
+    /*int c_Offset = 33;
+    for(int i = 0; i < 4; i++){
+      char Tid[256];
+      idSize = data[c_Offset - 1];
+      for(int i = c_Offset; i < idSize; i++){
+          Tid[i - c_Offset] = data[i];
+      }
+      kprintf(Tid);
+      c_Offset += idSize + 1;
+    }*/
+    int currentpos = 000;
+    for(int i = 0; i < 4; i++){
+      
+      idSize = data[currentpos + 32];
+      char Tid[256];
+      for(int i = 0; i < idSize; i++){
+          Tid[i] = data[i + currentpos + 33];
+      }
+      // Retrieve data
+      uint8_t dTmp[4];
+      for(int i = currentpos + 2; i < currentpos + 6; i++){
+          dTmp[i - (currentpos + 2)] = data[i];
+      }
+      uint32_t lba = little_endian_to_uint32(dTmp);
+      for(int i = currentpos + 10; i < currentpos + 14; i++){
+          dTmp[i - (currentpos + 10)] = data[i];
+      }
+      uint32_t size = little_endian_to_uint32(dTmp);
+      CD_DirectoryEntry d = {Tid, lba, size, 0};
+      cDirE++;
+      d_entries[cDirE] = d;
+      kprintf(Tid);
+      currentpos += data[currentpos];
     }
-    rootMedia.rootDirEntr = little_endian_to_uint32(&tmp);
-    // Read root dir record
-    uint8_t pT1[140]; 
-	c = read_cdrom(0x1F0, 0, rootMedia.rootDirEntr, 1, &pT1);
-    char dirID[16];
-    for(int i = 15; i < 30; i++){
-        dirID[i - 15] = pT1[i];
-    }
-    kprintf(dirID);*/
+    kprintf("================================");
+
     kprintf("[KFS] Root Media label:");
     kprintf(rootMedia.CD_volID);
 

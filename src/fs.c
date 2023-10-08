@@ -3,6 +3,7 @@
 */
 #include "fs.h"
 #include "stdint.h"
+#include "string.h"
 // From the BIOS data sector
 const unsigned short *hard_disks_ptr = (const unsigned short*) 0x0475;
 
@@ -38,6 +39,7 @@ void initFS(){
     
     // Init read from CD-DRIVE
     initCDFS();
+    return;
 }
 
 uint32_t little_endian_to_uint32(uint8_t* bytes) {
@@ -86,7 +88,12 @@ void initCDFS(){
     read_cdrom(0x1F0, 0, r_extentLBA, 1, &data);
 
     kprintf("================================");
-    kprintf("[KFS] Directory listing for '/':");
+    char listText[512];
+    strcat(listText, "[KFS] Directory listing for '");
+    strcat(listText, rootMedia.CD_volID);
+    strcat(listText, "'");
+    kprintf(listText);
+    readDirectory(data, "/");
     // Print out directories/files
     /*int c_Offset = 33;
     for(int i = 0; i < 4; i++){
@@ -98,38 +105,58 @@ void initCDFS(){
       kprintf(Tid);
       c_Offset += idSize + 1;
     }*/
-    int currentpos = 000;
-    for(int i = 0; i < 4; i++){
-      
-      idSize = data[currentpos + 32];
-      char Tid[256];
-      for(int i = 0; i < idSize; i++){
-          Tid[i] = data[i + currentpos + 33];
-      }
-      // Retrieve data
-      uint8_t dTmp[4];
-      for(int i = currentpos + 2; i < currentpos + 6; i++){
-          dTmp[i - (currentpos + 2)] = data[i];
-      }
-      uint32_t lba = little_endian_to_uint32(dTmp);
-      for(int i = currentpos + 10; i < currentpos + 14; i++){
-          dTmp[i - (currentpos + 10)] = data[i];
-      }
-      uint32_t size = little_endian_to_uint32(dTmp);
-      CD_DirectoryEntry d = {Tid, lba, size, 0};
-      cDirE++;
-      d_entries[cDirE] = d;
-      kprintf(Tid);
-      currentpos += data[currentpos];
-    }
+    
     kprintf("================================");
 
     kprintf("[KFS] Root Media label:");
     kprintf(rootMedia.CD_volID);
-
+    return;
 }
 
 
 void readDirectoryEntry(){
   
+}
+
+void readDirectory(uint8_t* data, char* dirs){
+  int currentpos = 000;
+  for(int i = 0; i < 256; i++){
+    
+    int idSize = data[currentpos + 32];
+    char Tid[256];
+    for(int i = 0; i < idSize; i++){
+        Tid[i] = data[i + currentpos + 33];
+    }
+    // Retrieve data
+    uint8_t dTmp[4];
+    for(int i = currentpos + 2; i < currentpos + 6; i++){
+        dTmp[i - (currentpos + 2)] = data[i];
+    }
+    uint32_t lba = little_endian_to_uint32(dTmp);
+    for(int i = currentpos + 10; i < currentpos + 14; i++){
+        dTmp[i - (currentpos + 10)] = data[i];
+    }
+    uint32_t size = little_endian_to_uint32(dTmp);
+    CD_DirectoryEntry d = {Tid, lba, size, 0};
+    cDirE++;
+    d_entries[cDirE] = d;
+    char fullPath[1024] = {0};
+    if(idSize > 1){
+      strcat(fullPath, dirs);
+      strcat(fullPath, Tid);
+      strcat(fullPath, "/");
+      kprintf(fullPath);
+    }
+    
+    // Check if its a sub-directory
+    int flags = data[currentpos + 25];
+    if((flags >> 1) & 1 == 1 && idSize > 1){
+      uint8_t m_data[2048];
+      read_cdrom(0x1F0, 0, lba, 1, &m_data);
+      readDirectory(m_data, fullPath);
+    }
+    
+    if(data[currentpos] == 0)break;
+    currentpos += data[currentpos];
+  }
 }

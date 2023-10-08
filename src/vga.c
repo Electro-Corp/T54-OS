@@ -1,6 +1,7 @@
 /*
     VGA Handler
 */
+#include "vga.h"
 #define WIDTH 80
 #define HEIGHT 25
 // Current row
@@ -8,7 +9,7 @@ int row = 0;
 int debug = 0;
 // Framebuffer adress
 static char* const fb = (char*)(0xb8000);
-
+static int strlen(char *str);
 void initTerminal(){
     // Clear the terminal
     char* tmp = "                                                                              ";
@@ -46,8 +47,3 @@ void charAt(char c, int x, int y, unsigned char color){
 
 
 
-int strlen(char *str){
-  int i = 0;
-  while(str[i++]){}
-  return i;
-}

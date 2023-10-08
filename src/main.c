@@ -9,4 +9,5 @@ int kmain(){
     kprintf("T54 Display Initilized");
     // Init fs
     initFS();
+    asm("hlt");
 }   

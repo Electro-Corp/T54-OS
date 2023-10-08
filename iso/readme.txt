@@ -1,1 +1,1 @@
-T54 is a small UNIX-like OS
+T54 is a small UNIX-like OS. (wow)

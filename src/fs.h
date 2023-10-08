@@ -14,7 +14,7 @@ typedef struct {
 
 
 typedef struct {
-    char* fileID;
+    char fileID[256];
     uint32_t locOfExtent;
     uint32_t sizeOfExtent;
 
@@ -31,4 +31,9 @@ static int cDirE = 0; // current index of directory index being loaded
 void initFS();
 
 void initCDFS();
+
+int readFile(char* filePath, uint8_t* buffer);
+
+CD_DirectoryEntry* getFile(char* filePath);
+
 #endif

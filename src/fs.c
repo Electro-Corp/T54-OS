@@ -6,7 +6,7 @@
 #include "string.h"
 // From the BIOS data sector
 const unsigned short *hard_disks_ptr = (const unsigned short*) 0x0475;
-
+#define NULL ((void *)0)
 uint8_t i_hdds = 0;
 
 
@@ -109,12 +109,13 @@ void initCDFS(){
     kprintf("================================");
     
   // 7
-    kprintf(d_entries[cDirE].fileID);
-    /*uint8_t t_lba = d_entries[7].locOfExtent;
-    uint8_t t_size = d_entries[7].sizeOfExtent;
+    char* fileName = "/BOOT/GRUB/MENU.LST";
+    uint32_t t_size = getFile(fileName)->sizeOfExtent;
     uint8_t t_data[t_size];
-    read_cdrom(0x1F0, 0, t_lba, 1, &data);
-    kprintf((char*)t_data);*/
+    if(readFile(fileName, &t_data) != -1)
+    kprintf(t_data);
+    else
+    kprintf("Failed to read file");
     return;
 }
 
@@ -152,10 +153,15 @@ void readDirectory(uint8_t* data, char* dirs){
       strcat(fullPath, Tid);
       if((flags >> 1) & 1 == 1)
         strcat(fullPath, "/");
-      kprintf(fullPath);
+      
       CD_DirectoryEntry d = {fullPath, lba, size, 0};
+      strcpy(d.fileID, fullPath);
+      d.locOfExtent = lba;
+      d.sizeOfExtent = size;
       cDirE++;
       d_entries[cDirE] = d;
+
+      kprintf(d_entries[cDirE].fileID);
     }
     
     // Check if its a sub-directory
@@ -169,4 +175,26 @@ void readDirectory(uint8_t* data, char* dirs){
     if(data[currentpos] == 0)break;
     currentpos += data[currentpos];
   }
+}
+
+
+int readFile(char* filePath, uint8_t* buffer){
+  // Scan for file
+  CD_DirectoryEntry* tmp = getFile(filePath);
+  if(tmp != NULL){
+    int secs = 1;
+    if(tmp->sizeOfExtent / 2048 > 1) secs = tmp->sizeOfExtent / 2048;
+    read_cdrom(0x1F0, 0, tmp->locOfExtent, secs, &buffer);
+    return 0; 
+  }
+  return -1;
+}
+
+CD_DirectoryEntry* getFile(char* filePath){
+  for(int i = 0; i <= cDirE; i++){
+    if(strcmp(filePath, d_entries[i].fileID) == 0){
+      return &(d_entries[i]);
+    }
+  }
+  return NULL;
 }

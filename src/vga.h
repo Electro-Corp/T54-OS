@@ -6,7 +6,7 @@
 
 // Terminal
 void initTerminal();
-void kprintf(char *string);
+void kprintf(char *string, ...);
 void dkprintf(char* string);
 
 // UTILS

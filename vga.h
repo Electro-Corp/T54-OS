@@ -1,7 +1,7 @@
 /*
     Header for VGA
 */
-
+#include "io.h"
 
 // Terminal
 void initTerminal();

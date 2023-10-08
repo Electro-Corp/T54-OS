@@ -50,8 +50,10 @@ uint32_t little_endian_to_uint32(uint8_t* bytes) {
 
 void initCDFS(){
     kprintf("[KFS] Init root FS from CD-ROM Drive");
+    kprintf("[KFS] This FS will be non-writable, and can only be used");
+    kprintf("      to run programs from /bin");
     uint8_t pvd[2048];
-	int c = read_cdrom(0x1F0, 0, 16, 1, &pvd);
+	  int c = read_cdrom(0x1F0, 0, 16, 1, &pvd);
     kprintf("[KFS] Read PVD");
     // Read drive label
     int labelOffset = 40; // Starts at offset 40, size of 32
@@ -77,27 +79,7 @@ void initCDFS(){
 
     CD_DirectoryEntry root = {id, r_extentLBA, r_extentSize, 0};
     d_entries[cDirE] = root;
-    // Ok now lets recursivly load them in  
-    for(int i = 0; i < 2; i++){
-        uint8_t data[2048];
-        read_cdrom(0x1F0, 0, d_entries[cDirE].locOfExtent + (d_entries[cDirE].locOfExtent / 2048), 1, &data);
-        char id[256];
-        for(int i = 33; data[i] != ';' && i < 256 && data[i] != 0; i++){
-            id[i - (33)] = data[i];
-        }
-        kprintf(id);
-        for(int i = 2; i < 6; i++){
-            tmp[i - 2] = data[i];
-        }
-        uint32_t r_extentLBA = little_endian_to_uint32(tmp);
-        for(int i = 10; i < 16; i++){
-            tmp[i - 10] = data[i];
-        }
-        uint32_t r_extentSize = little_endian_to_uint32(tmp);
-        cDirE++;
-        CD_DirectoryEntry goof = {r_extentLBA, r_extentSize, id};
-        d_entries[cDirE] = goof;
-    }
+    
 
     /*uint8_t tmp[4];
     for(int i = pathOffset; i < pathOffset + 3; i++){
@@ -115,4 +97,9 @@ void initCDFS(){
     kprintf("[KFS] Root Media label:");
     kprintf(rootMedia.CD_volID);
 
+}
+
+
+void readDirectoryEntry(){
+  
 }

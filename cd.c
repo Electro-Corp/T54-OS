@@ -1,21 +1,9 @@
 #ifndef HD_C
 #define HD_C
 #include "stdint.h"
+#include  "io.h"
 
 
-// IO
-// read from port
-unsigned char inb(unsigned short _port)
-{
-	unsigned char rv;
-	__asm__ __volatile__("inb %1, %0" : "=a" (rv) : "dN" (_port));
-	return rv;
-}
-// write to port
-void outb(unsigned short _port, unsigned char _data)
-{
-	__asm__ __volatile__("outb %1, %0" : : "dN" (_port), "a" (_data));
-}
 
 
 
@@ -145,7 +133,7 @@ int read_cdrom(uint16_t port, int slave, uint32_t lba, uint32_t sectors, uint16_
 		insw(port + DATA, (uint16_t*)((uint8_t*)buffer + i * 0x800), size / 2); 
 	}
 	//tdebug("[read_cdrom] read finished. thank you");
-    dkprintf("[CD-ROM] Read finished, thank you.");
+  dkprintf("[CD-ROM] Read finished, thank you.");
 	return 0;
 }
 

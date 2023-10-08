@@ -5,16 +5,20 @@
 #define HEIGHT 25
 // Current row
 int row = 0;
-int debug = 1;
+int debug = 0;
 // Framebuffer adress
 static char* const fb = (char*)(0xb8000);
 
 void initTerminal(){
+    // Clear the terminal
     char* tmp = "                                                                              ";
     for(int i = 0; i < 25; i++){
         kprintf(tmp);
     }
     row = 0;
+    // Disable cursor
+    outb(0x3D4, 0x0A);
+  	outb(0x3D5, 0x20);
 }
 
 
@@ -24,7 +28,7 @@ void initTerminal(){
 void kprintf(char *string){
  // clearScreen();
   for(int i = 0; i < strlen(string); i++){
-    charAt(string[i], i, row, 0xF);
+    charAt(string[i], i, row, 0x7);
   }
   row++;
 }

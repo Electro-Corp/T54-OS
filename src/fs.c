@@ -93,25 +93,13 @@ void initCDFS(){
     strcat(listText, rootMedia.CD_volID);
     strcat(listText, "'");
     kprintf(listText);
-    readDirectory(data, "/");
-    // Print out directories/files
-    /*int c_Offset = 33;
-    for(int i = 0; i < 4; i++){
-      char Tid[256];
-      idSize = data[c_Offset - 1];
-      for(int i = c_Offset; i < idSize; i++){
-          Tid[i - c_Offset] = data[i];
-      }
-      kprintf(Tid);
-      c_Offset += idSize + 1;
-    }*/
-    
+    readDirectory(data, "/");    
     kprintf("================================");
     
   // 7
     char* fileName = "/README.TXT";
     uint32_t t_size = getFile(fileName)->sizeOfExtent;
-    uint8_t t_data[t_size];
+    char t_data[t_size];
     if(readFile(fileName, &t_data) != -1)
     kprintf(t_data);
     else

@@ -13,11 +13,23 @@ int kmain(){
     // Init display
     initTerminal();
     kprintf("[Kernel] T54 Display Initilized");
+
     // Init fs
     initFS();
     // Do a test (if needed)
     //testRead();
-    kprintf("[Kernel] Launching /bin/init");
+    
+    // Load object into memory
+    CD_DirectoryEntry* hello = getFile("/BIN/HELLO");
+    if(hello != NULL){
+        kprintf("[Kernel] Loading /bin/hello");
+        uint32_t hello_size = hello->sizeOfExtent;
+        uint16_t hello_data[hello_size];
+        readFile(hello->fileID, &hello_data);
+        kprintf("[Kernel] Launching /bin/hello");
+        uint16_t* start = &hello_data;
+        asm("jmp %0" : "=b" (start));
+    }
     asm("hlt");
 }   
 

@@ -14,6 +14,7 @@ gcc -c  src/io.c -m32 -nostdinc -fno-builtin -fno-stack-protector -nostartfiles 
 ld -T link.ld -melf_i386 out/boot.o out/fs.o out/main.o out/vga.o out/cd.o out/io.o -o iso/boot/kernel
 
 echo Comp Programs
+nasm -f aout programs/hello.asm -o iso/bin/init   
 #gcc programs/init.c -o iso/bin/elf/init
 #gcc -Wl,--oformat=a.out-i386-linux programs/init.c -o iso/bin/init 
 #gcc -Wl,--oformat=a.out-i386-linux programs/hello.c -o iso/bin/hello

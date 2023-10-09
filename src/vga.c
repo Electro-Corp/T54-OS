@@ -17,7 +17,7 @@ void clear(){
   row = 0;
   // Clear the terminal
   for(int i = 0; i < HEIGHT; i++){
-      noSavePrint(tmp, i);
+      noSavePrint(tmp);
   }
   row = 0;
 }
@@ -41,10 +41,10 @@ void kprintf(char *string, ...){
     charAt(string[i], i, row, 0x7);
   }
   row++;
-  if(row > HEIGHT){
+  if(row + 1 > HEIGHT){
     // Lets shift everything (horribly inefficent)
     clear();
-    for(int c = 0; c < HEIGHT - 2; c++){
+    for(int c = 0; c < HEIGHT - 1; c++){
       kprintf(charLines[c + 1]);
       strcpy(charLines[c + 1], tmp);
     }

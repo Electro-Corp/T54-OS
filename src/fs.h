@@ -18,12 +18,12 @@ typedef struct {
     uint32_t locOfExtent;
     uint32_t sizeOfExtent;
 
-    int tmp;
+    int isDirectory;
     //CD_DirectoryEntry* nextEntry;
 } CD_DirectoryEntry;
 
 // FS's
-CD_FS rootMedia;
+static CD_FS rootMedia;
 
 static CD_DirectoryEntry d_entries[256];
 static int cDirE = 0; // current index of directory index being loaded
@@ -32,7 +32,7 @@ void initFS();
 
 void initCDFS();
 
-int readFile(char* filePath, uint8_t* buffer);
+int readFile(char* filePath, uint16_t* buffer);
 
 CD_DirectoryEntry* getFile(char* filePath);
 

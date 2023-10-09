@@ -59,50 +59,10 @@ int read_cdrom(uint16_t port, int slave, uint32_t lba, uint32_t sectors, uint16_
 	outb(port + LBA_HIGH, 2048 >> 8);
 	outb(port + COMMAND_REGISTER, 0xA0); 
 	ata_io_wait(port); 
-	//tdebug("[read_cdrom] waiting for status");
     dkprintf("[CD-ROM] Waiting for status");
-	/*int i = 0, portToTry = 0x1f0, good = 0, itrs = 0;
-	while (portToTry <= 0x1F7 || good == 1) {
-		char portTmp[5];
-		char portd[35] = "Testing: ";
-		itoa(portToTry, portTmp, 5, 10);
-		strcat(portd, portTmp);
-		//tout(portd);
-		while (i++ < 10000000) {
-			uint8_t status = inb(portToTry + COMMAND_REGISTER);
-			if ((status & 0x01) == 1) {
-				good = 0;
-				//tout("Failed.");
-				break;
-				//return 1;
-			}
-			if (!(status & 0x80) && (status & 0x08)) {
-				good = 1;
-				break;
-			}
-			ata_io_wait(portToTry);
-		}
-		if (i > 10000000) {
-			//tout("Timed out.");
-		}
-		i = 0;
-		portToTry++;
-		itrs++;
-	}
-	char debugTmp[5];
-	char debugFull[256] = "Ran through: ";
-	itoa(itrs, debugTmp, 5, 10);
-	strcat(debugFull, debugTmp);
-	//tout(debugFull);
-	*/
     
 	while (1) {
 		uint8_t status = inb(port + COMMAND_REGISTER);
-/*		char debugTmp[5];
-		char debugFull[256] = "Status: ";
-		itoa(status, debugTmp, 5, 10);
-		strcat(debugFull, debugTmp);
-		//tsameline(debugFull);*/
 		if ((status & 0x01) == 1) {
 			return 1;
 		}
@@ -117,7 +77,6 @@ int read_cdrom(uint16_t port, int slave, uint32_t lba, uint32_t sectors, uint16_
     dkprintf("[CD-ROM] Sending command");
 	outsw(port + DATA, (uint16_t*)read_cmd, 6);
     dkprintf("[CD-ROM] Read data");
-	//tdebug("[read_cdrom] read data back...");
 	for (uint32_t i = 0; i < sectors; i++) {
 		while (1) {
 			uint8_t status = inb(port + COMMAND_REGISTER);
@@ -132,8 +91,7 @@ int read_cdrom(uint16_t port, int slave, uint32_t lba, uint32_t sectors, uint16_
 
 		insw(port + DATA, (uint16_t*)((uint8_t*)buffer + i * 0x800), size / 2); 
 	}
-	//tdebug("[read_cdrom] read finished. thank you");
-  dkprintf("[CD-ROM] Read finished, thank you.");
+  	dkprintf("[CD-ROM] Read finished, thank you.");
 	return 0;
 }
 

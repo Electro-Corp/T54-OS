@@ -4,9 +4,9 @@
 #include "fs.h"
 #include "stdint.h"
 #include "string.h"
+#include "stdlib.h"
 // From the BIOS data sector
 const unsigned short *hard_disks_ptr = (const unsigned short*) 0x0475;
-#define NULL ((void *)0)
 uint8_t i_hdds = 0;
 
 
@@ -81,7 +81,7 @@ void initCDFS(){
         id[i - (rootOffset + 33)] = pvd[i];
     }
 
-    CD_DirectoryEntry root = {id, r_extentLBA, r_extentSize, 0};
+    CD_DirectoryEntry root = {id, r_extentLBA, r_extentSize, 1};
     d_entries[cDirE] = root;
 
     uint8_t data[2048];
@@ -89,35 +89,25 @@ void initCDFS(){
 
     kprintf("================================");
     char listText[512];
-    strcat(listText, "[KFS] Directory listing for '");
+    strcat(listText, "[KFS] Directory listing for ");
     strcat(listText, rootMedia.CD_volID);
-    strcat(listText, "'");
     kprintf(listText);
     readDirectory(data, "/");    
     kprintf("================================");
     
-  // 7
-    char* fileName = "/README.TXT";
-    uint32_t t_size = getFile(fileName)->sizeOfExtent;
-    char t_data[t_size];
-    if(readFile(fileName, &t_data) != -1)
-    kprintf(t_data);
-    else
-    kprintf("Failed to read file");
     return;
 }
 
-
-void readDirectoryEntry(){
-  
-}
-
+/*
+  Iterates through all directories and files and
+  caches them in d_entries.
+*/
 void readDirectory(uint8_t* data, char* dirs){
   int currentpos = 000;
   for(int i = 0; i < 256; i++){
     int flags = data[currentpos + 25];
     int idSize = data[currentpos + 32];
-    char Tid[256];
+    char Tid[256] = {0};
     for(int i = 0; i < idSize && data[i + currentpos + 33] != ';'; i++){
         if((flags >> 1) & 1 == 1 || data[i + currentpos + 34] == ';'){
           if(data[i + currentpos + 33] == '.') break;
@@ -135,20 +125,24 @@ void readDirectory(uint8_t* data, char* dirs){
     }
     uint32_t size = little_endian_to_uint32(dTmp);
     
-    char fullPath[1024] = {0, 0, 0, 0, 0, 0};
+    char fullPath[1024] = {0};
     if(idSize > 1){
       strcat(fullPath, dirs);
       strcat(fullPath, Tid);
       if((flags >> 1) & 1 == 1)
         strcat(fullPath, "/");
       
-      CD_DirectoryEntry d = {fullPath, lba, size, 0};
+      CD_DirectoryEntry d = {fullPath, lba, size, (flags >> 1) & 1};
       strcpy(d.fileID, fullPath);
       d.locOfExtent = lba;
       d.sizeOfExtent = size;
+      d.isDirectory = (flags >> 1) & 1;
       cDirE++;
+
+      // Add directory 
       d_entries[cDirE] = d;
 
+      // Print it out
       kprintf(d_entries[cDirE].fileID);
     }
     
@@ -165,19 +159,30 @@ void readDirectory(uint8_t* data, char* dirs){
   }
 }
 
-
-int readFile(char* filePath, uint8_t* buffer){
+/*
+  Read a specifc file into a buffer.
+*/
+int readFile(char* filePath, uint16_t* buffer){
   // Scan for file
   CD_DirectoryEntry* tmp = getFile(filePath);
-  if(tmp != NULL){
+  // Make sure it exists and its not a directory
+  if(tmp != NULL && tmp->isDirectory == 0){
     int secs = 1;
-    if(tmp->sizeOfExtent / 2048 > 1) secs = tmp->sizeOfExtent / 2048;
-    read_cdrom(0x1F0, 0, tmp->locOfExtent, secs, &buffer);
+    if(tmp->sizeOfExtent / 2048 > 1){ 
+      secs = tmp->sizeOfExtent / 2048;
+    }
+    read_cdrom(0x1F0, 0, tmp->locOfExtent, secs, (uint16_t*)buffer);
+    // We chillin
     return 0; 
   }
+  // Error (lamo)
   return -1;
 }
 
+/*
+  Returns a CD_DirectoryEntry for a sepecific 
+  filePath
+*/
 CD_DirectoryEntry* getFile(char* filePath){
   for(int i = 0; i <= cDirE; i++){
     if(strcmp(filePath, d_entries[i].fileID) == 0){

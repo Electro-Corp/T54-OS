@@ -24,12 +24,16 @@ int kmain(){
     if(hello != NULL){
         kprintf("[Kernel] Loading /bin/hello");
         uint32_t hello_size = hello->sizeOfExtent;
-        uint16_t hello_data[hello_size];
+        uint16_t hello_data[500];
         readFile(hello->fileID, &hello_data);
         kprintf("[Kernel] Launching /bin/hello");
-        uint16_t* start = &hello_data;
-        asm("jmp %0" : "=b" (start));
+        void (*foo)(void) = (void (*)())&hello_data;
+        kprintf(hello_data);
+        foo();
+    }else{
+        kprintf("[Kernel] Failed to find /BIN/HELLO");
     }
+    kprintf("[Kernel] /bin/hello finished executing");
     asm("hlt");
 }   
 

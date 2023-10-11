@@ -36,11 +36,14 @@ void initTerminal(){
 */
 void kprintf(char *string, ...){
   strcpy(charLines[row], string);
-  int x = 0;
+  int x = 0, rowDoNot = 0;
   for(int i = 0; i < strlen(string); i++){
+    if(string[i] == '\\' && string[i+ 1] == 'r')
+      rowDoNot = 1;
     charAt(string[i], i, row, 0x7);
   }
-  row++;
+  if(!rowDoNot)
+    row++;
   if(row + 1 > HEIGHT){
     // Lets shift everything (horribly inefficent)
     clear();

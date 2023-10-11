@@ -9,9 +9,10 @@ gcc -c  src/main.c -m32 -nostdinc -fno-builtin -fno-stack-protector -nostartfile
 gcc -c  src/vga.c -m32 -nostdinc -fno-builtin -fno-stack-protector -nostartfiles -W -o out/vga.o
 gcc -c  src/fs.c -m32 -nostdinc -fno-builtin -fno-stack-protector -nostartfiles -W -o out/fs.o
 gcc -c  src/cd.c -m32 -nostdinc -fno-builtin -fno-stack-protector -nostartfiles -W -o out/cd.o
+gcc -c  src/term.c -m32 -nostdinc -fno-builtin -fno-stack-protector -nostartfiles -W -o out/term.o
 gcc -c  src/io.c -m32 -nostdinc -fno-builtin -fno-stack-protector -nostartfiles -W -o out/io.o
 
-ld -T link.ld -melf_i386 out/boot.o out/fs.o out/main.o out/vga.o out/cd.o out/io.o -o iso/boot/kernel
+ld -T link.ld -melf_i386 out/boot.o out/fs.o out/main.o out/vga.o out/cd.o out/io.o out/term.o -o iso/boot/kernel
 
 echo Comp Programs
 rm iso/bin/*

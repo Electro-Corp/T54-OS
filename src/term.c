@@ -93,6 +93,8 @@ void termLoop(){
             }
           }else{
             for(int i = 0; i < b; i++){
+              // The CD FS has everything captalized so like
+              // lets do that
               if(buffer[i] != '\\' && buffer[i] != "." && buffer[i] != '/')
               buffer[i] -= 32;
             }

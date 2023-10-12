@@ -1,6 +1,6 @@
 [BITS 32]
 
-mov dl, 0x7c        
+mov dl, 0x4c        
 mov al, 'H'
 mov byte [0xB8000], al
 mov byte [0xB8001], dl

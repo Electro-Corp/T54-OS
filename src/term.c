@@ -8,7 +8,9 @@
 */
 #include "io.h"
 #include "vga.h"
-
+#include "fs.h"
+#include "stdlib.h"
+#include "proc.h"
 // Keyboard map
 unsigned char keyboard_map[128] =
 {
@@ -60,25 +62,65 @@ void termInit(){
     kprintf("Used for debugging purposes and launching programs.");
     kprintf("Commands:");
     kprintf("dir -- Lists all directories and files");
-    kprintf("launch [file] -- tries to luanch the specified file");
+    kprintf("[file] -- tries to luanch the specified file");
     kprintf(" ");
 }
 char buffer[2048];
 int b = 0;
 char* text = "T54> ";
 void termLoop(){
+    outb(0x20, 0x20);
+    char k;
+    k = inb(0x60);
     char final[5048] = {0};
-    char keycode = keyboard_map[inb(0x60)];
+    char keycode = keyboard_map[k];
     if(keycode){
-        buffer[b++] = keycode;
-        strcat(final, text);
-        strcat(final, buffer);
-        strcat(final, '\r');
-        kprintf(final);
+        if(keycode != '\n'){
+          buffer[b++] = keycode;
+          strcat(final, text);
+          strcat(final, buffer);
+          strcat(final, "\\r");
+          kprintf(final);
+        }else{
+          strcat(final, text);
+          strcat(final, buffer);
+          kprintf(final);
+          kprintf("Executing...");
+          if(strcmp("dir", buffer) == 0){
+            kprintf("Directory Listing:");
+            for(int i = 0; i < cDirE; i++){
+              kprintf(d_entries[i].fileID);
+            }
+          }else{
+            for(int i = 0; i < b; i++){
+              if(buffer[i] != '\\' && buffer[i] != "." && buffer[i] != '/')
+              buffer[i] -= 32;
+            }
+            CD_DirectoryEntry* exe = getFile(buffer);
+            void (*foo)(void);
+            if(exe != NULL){
+                uint32_t hello_size = exe->sizeOfExtent;
+                uint16_t hello_data[500];
+                readFile(exe->fileID, &hello_data);
+                foo = (void (*)())&hello_data;
+                foo();
+            }else{
+                kprintf("Failed to find executable");
+            }
+          }
+          // Clear buffer
+          for(int i = 0; i < b; i++){
+            buffer[i] = 0;
+          }
+          b = 0;
+          // Reprint "T54>"
+          char final[128] = {0};
+          strcat(final, "T54>");
+          strcat(final, "\\r");
+          kprintf(final);
+        }
     }
-
-    int status = inb(0x64);
-    while((status >> 0) & 1 != 1){
-
+    while(!((k >> 7) & 1)){
+      k = inb(0x60);
     }
 }

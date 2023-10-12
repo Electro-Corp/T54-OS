@@ -5,7 +5,6 @@
 #define WIDTH 80
 #define HEIGHT 25
 // Current row
-int row = 0;
 int debug = 0;
 // Lines
 char charLines[HEIGHT][256];
@@ -38,8 +37,11 @@ void kprintf(char *string, ...){
   strcpy(charLines[row], string);
   int x = 0, rowDoNot = 0;
   for(int i = 0; i < strlen(string); i++){
-    if(string[i] == '\\' && string[i+ 1] == 'r')
+    if(string[i] == '\\' && string[i+ 1] == 'r'){
       rowDoNot = 1;
+      i+=1;
+      continue;
+    }
     charAt(string[i], i, row, 0x7);
   }
   if(!rowDoNot)

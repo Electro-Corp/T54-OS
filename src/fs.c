@@ -9,6 +9,8 @@
 const unsigned short *hard_disks_ptr = (const unsigned short*) 0x0475;
 uint8_t i_hdds = 0;
 
+CD_DirectoryEntry d_entries[256];
+int cDirE = 0; // current index of directory index being loaded
 
 void initFS(){
     kprintf("[KFS] Initilizing FS");
@@ -190,4 +192,13 @@ CD_DirectoryEntry* getFile(char* filePath){
     }
   }
   return NULL;
+}
+
+
+int getNumOfDirs(){
+  return cDirE;
+}
+
+CD_DirectoryEntry* getDirs(){
+  return d_entries;
 }

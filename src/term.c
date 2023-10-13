@@ -10,7 +10,8 @@
 #include "vga.h"
 #include "fs.h"
 #include "stdlib.h"
-#include "proc.h"
+
+
 // Keyboard map
 unsigned char keyboard_map[128] =
 {
@@ -51,7 +52,10 @@ unsigned char keyboard_map[128] =
     0,  /* F12 Key */
     0,  /* All other keys are undefined */
 };
-
+/*
+    Sets up keyboard and prints out
+    init text
+*/
 void termInit(){
     // Enable keyboard interrupt
     unsigned char curmask_master = inb(0x21);
@@ -79,17 +83,15 @@ void termLoop(){
           buffer[b++] = keycode;
           strcat(final, text);
           strcat(final, buffer);
-          strcat(final, "\\r");
+          strcat(final, "\\r"); // Make it print on the same line
           kprintf(final);
         }else{
           strcat(final, text);
           strcat(final, buffer);
           kprintf(final);
-          kprintf("Executing...");
           if(strcmp("dir", buffer) == 0){
-            kprintf("Directory Listing:");
-            for(int i = 0; i < cDirE; i++){
-              kprintf(d_entries[i].fileID);
+            for(int i = 2; i < getNumOfDirs(); i++){
+              kprintf(getDirs()[i].fileID);
             }
           }else{
             for(int i = 0; i < b; i++){
@@ -98,16 +100,19 @@ void termLoop(){
               if(buffer[i] != '\\' && buffer[i] != "." && buffer[i] != '/')
               buffer[i] -= 32;
             }
-            CD_DirectoryEntry* exe = getFile(buffer);
+            /*CD_DirectoryEntry* exe = getFile(buffer);
             void (*foo)(void);
             if(exe != NULL){
                 uint32_t hello_size = exe->sizeOfExtent;
-                uint16_t hello_data[500];
+                uint16_t hello_data[hello_size];
                 readFile(exe->fileID, &hello_data);
                 foo = (void (*)())&hello_data;
                 foo();
             }else{
                 kprintf("Failed to find executable");
+            }*/
+            if(runProgram(buffer) == -1){
+                kprintf("File failed to execute or does not exist");    
             }
           }
           // Clear buffer

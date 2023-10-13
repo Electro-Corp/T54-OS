@@ -1,7 +1,7 @@
 /*
   Init program
 */
-int c;
+extern kprintf(char*);
 main(){
-  
+  kprintf("hi");
 }

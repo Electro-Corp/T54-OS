@@ -1,6 +1,12 @@
 [BITS 32]
+;
+; Print the text "HELLO" to the top of the screen
+; 
 
-mov dl, 0x4c        
+; Color of the text (wow)
+mov dl, 0x4c
+
+; Write H   
 mov al, 'H'
 mov byte [0xB8000], al
 mov byte [0xB8001], dl
@@ -22,5 +28,3 @@ mov byte [0xB8008], al
 mov byte [0xB8009], dl
 
 ret
-
-

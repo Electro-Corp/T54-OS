@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "fs.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "stdlib.h": "c"
     }
 }

@@ -11,7 +11,7 @@ static int row = 0;
 
 // Terminal
 void initTerminal();
-void kprintf(char *string, ...);
+void kprintf(char*, ...);
 void dkprintf(char* string);
 
 // UTILS

@@ -13,6 +13,6 @@ typedef struct{
 } Process;
 
 
-int runProgram(char* filename);
+int runProcDirect(char* filename);
 
 #endif

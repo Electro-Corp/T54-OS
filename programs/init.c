@@ -2,6 +2,6 @@
   Init program
 */
 extern kprintf(char*);
-main(){
+int main(){
   kprintf("hi");
 }

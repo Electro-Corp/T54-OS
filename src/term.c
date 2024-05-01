@@ -60,6 +60,7 @@ void termInit(){
     // Enable keyboard interrupt
     unsigned char curmask_master = inb(0x21);
     outb(0x21, curmask_master & 0xFD);
+    // Print intro text
     kprintf("==================================");
     kprintf("        T54 DEBUG TERMINAL        ");
     kprintf("==================================");
@@ -67,19 +68,30 @@ void termInit(){
     kprintf("Commands:");
     kprintf("dir -- Lists all directories and files");
     kprintf("[file] -- tries to luanch the specified file");
+    kprintf("cat - enables cat mode, next [file] given to terminal will be printed");
     kprintf(" ");
 }
 char buffer[2048];
 int b = 0;
 char* text = "T54> ";
+char k;
+char keycode;
+int cat = 0;
 void termLoop(){
-    outb(0x20, 0x20);
-    char k;
+    //outb(0x20, 0x20);
     k = inb(0x60);
     char final[5048] = {0};
-    char keycode = keyboard_map[k];
+    keycode = keyboard_map[k];
     if(keycode){
-        if(keycode != '\n'){
+        if(keycode == '\b'){
+          if(b > 0)
+            buffer[b--] = 0;
+          strcat(final, text); 
+          strcat(final, buffer);
+          strcat(final, "\\r"); // Make it print on the same line
+          kprintf(final);
+        }
+        else if(keycode != '\n'){
           buffer[b++] = keycode;
           strcat(final, text);
           strcat(final, buffer);
@@ -93,6 +105,9 @@ void termLoop(){
             for(int i = 2; i < getNumOfDirs(); i++){
               kprintf(getDirs()[i].fileID);
             }
+          }else if(strcmp("cat", buffer) == 0){
+            cat = 1;
+            kprintf("cat enabled, next file on term will printed out");
           }else{
             for(int i = 0; i < b; i++){
               // The CD FS has everything captalized so like
@@ -100,20 +115,29 @@ void termLoop(){
               if(buffer[i] != '\\' && buffer[i] != "." && buffer[i] != '/')
               buffer[i] -= 32;
             }
-            /*CD_DirectoryEntry* exe = getFile(buffer);
-            void (*foo)(void);
-            if(exe != NULL){
-                uint32_t hello_size = exe->sizeOfExtent;
-                uint16_t hello_data[hello_size];
-                readFile(exe->fileID, &hello_data);
-                foo = (void (*)())&hello_data;
-                foo();
+            if(readELFFile(buffer) == 0){
+              kprintf("ELF File executed");
             }else{
-                kprintf("Failed to find executable");
-            }*/
-            if(runProgram(buffer) == -1){
-                kprintf("File failed to execute or does not exist");    
+              CD_DirectoryEntry* exe = getFile(buffer);
+              void (*foo)(void);
+              if(exe != NULL){
+                  uint32_t hello_size = exe->sizeOfExtent;
+                  uint16_t hello_data[hello_size];
+                  readFile(exe->fileID, &hello_data);
+                  if(cat == 0){
+                    foo = (void (*)())&hello_data;
+                    foo();
+                  }else{
+                    kprintf((char*)hello_data);
+                    cat = 0;
+                  }
+              }else{
+                  kprintf("Failed to find executable");
+              }
             }
+            /*if(runProcDirect(buffer) == -1){
+                kprintf("File failed to execute or does not exist");    
+            }*/
           }
           // Clear buffer
           for(int i = 0; i < b; i++){

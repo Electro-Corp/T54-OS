@@ -1,11 +1,20 @@
 #include "proc.h"
-int runProgram(char* filename){
-  
+
+/*
+  Bad function
+  dosent create a process just attempts to
+  run it directly (dangerous)
+*/
+int runProcDirect(char* filename){
   CD_DirectoryEntry* exe = getFile(filename);
+  // Executable caller
   void (*foo)(void);
   if(exe != NULL){
+      // Size of data
       uint32_t hello_size = exe->sizeOfExtent;
+      // Buffer for executable
       uint16_t hello_data[500];
+      // Read executable data
       readFile(exe->fileID, &hello_data);
       // Check if the file is an AOUT file
       if(hello_data[0] == 7){

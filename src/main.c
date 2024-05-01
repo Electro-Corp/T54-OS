@@ -17,8 +17,7 @@ int kmain(){
 
     // Init fs
     initFS();
-    // Do a test (if needed)
-    //testRead();
+    // Do a test (if needed) (aka if testProg is set)
     if(testProg == 1){
         // Load object into memory
         CD_DirectoryEntry* hello = getFile("/BIN/HELLO");

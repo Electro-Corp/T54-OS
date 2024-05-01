@@ -2,6 +2,7 @@
     VGA Handler
 */
 #include "vga.h"
+#include <stdarg.h>
 #define WIDTH 80
 #define HEIGHT 25
 // Current row
@@ -34,6 +35,7 @@ void initTerminal(){
     Print to the terminal
 */
 void kprintf(char *string, ...){
+  va_list va; 
   strcpy(charLines[row], string);
   int x = 0, rowDoNot = 0;
   for(int i = 0; i < strlen(string); i++){
@@ -72,8 +74,6 @@ void charAt(char c, int x, int y, unsigned char color){
   int position = 2 * x + 160 * y;
   fb[position] = c;
   fb[position+1] = color;
-
-  
 }
 
 
